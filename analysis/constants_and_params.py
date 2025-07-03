@@ -1,7 +1,7 @@
 from algorithm.agents import StrategyAgent, AgentWithTrust
 from algorithm.agents.base import BaseAgent
 from algorithm.agents.strategy_based import AcceptStrategy, SendStrategy, TrustMechanism
-from problems import LABS, ExpandedSchaffer, Griewank
+from problems import LABS, ExpandedSchaffer, Griewank, Ackley
 
 OUTPUT_DIR = "./new_output"
 
@@ -29,9 +29,9 @@ NO_SEND_PENALTY = int(POPULATION_SIZE * POPULATION_PART_TO_SWAP)
 AGENTS_TO_TEST = [BaseAgent, StrategyAgent]
 # TODO: add Ackley and other binary problem
 PROBLEMS_TO_TEST = [
-    LABS,
     ExpandedSchaffer,
     Griewank,
+    Ackley,
 ]
 ACCEPT_STRATEGIES_TO_TEST = [
     strategy

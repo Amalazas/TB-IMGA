@@ -58,6 +58,36 @@ class Griewank(FloatProblem):
         return cls.__name__
 
 
+class Ackley(FloatProblem):
+    def __init__(self, number_of_variables: int = 10):
+        super(Ackley, self).__init__()
+        self.lower_bound = [-5] * number_of_variables
+        self.upper_bound = [5] * number_of_variables
+
+    def number_of_objectives(self) -> int:
+        return 1
+
+    def number_of_constraints(self) -> int:
+        return 0
+
+    def evaluate(self, solution: FloatSolution) -> FloatSolution:
+        a = 20
+        b = 0.2
+        c = 2 * np.pi
+        x = np.array(solution.variables)
+        d = x.shape[0]
+
+        first_exp_term = -a * np.exp(-b * np.sqrt(np.sum(x**2) / d))
+        second_exp_term = -np.exp(np.sum(np.cos(c * x)) / d)
+        solution.objectives[0] = first_exp_term + second_exp_term + a + np.exp(1)
+        
+        return solution
+
+    @classmethod
+    def name(cls) -> str:
+        return cls.__name__
+
+
 class LABS(BinaryProblem):
     def __init__(
         self,
