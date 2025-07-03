@@ -1,6 +1,6 @@
 from algorithm.agents import StrategyAgent, AgentWithTrust
 from algorithm.agents.base import BaseAgent
-from algorithm.agents.strategy_based import AcceptStrategy, SendStrategy, TrustMechanism
+from algorithm.agents.strategy_based import AcceptStrategy, SendStrategy, TrustMechanism, MigrationPolicy
 from problems import LABS, ExpandedSchaffer, Griewank, Ackley
 
 OUTPUT_DIR = "./new_output"
@@ -14,6 +14,7 @@ SIGNIFICANCE_LEVEL = 0.05
 NUMBER_OF_ITERATIONS = 9998  # 9998 for 100000 evaluations, 998 for 10000 evaluations
 ITERATION_INTERVAL = 50
 TRUST_MECHANISM = TrustMechanism.Local
+MIGRATION_POLICY = MigrationPolicy.Basic
 NUMBER_OF_RUNS = 10
 NUM_OF_VARS = 200
 POPULATION_SIZE = 20
@@ -25,6 +26,8 @@ MIGRATION = True
 AGENTS_NUMBER = 24
 POPULATION_PART_TO_SWAP = 0.1
 NO_SEND_PENALTY = int(POPULATION_SIZE * POPULATION_PART_TO_SWAP)
+AUCTION_TRUST_WEIGHT = 0.5
+AUCTION_SOLUTION_WEIGHT = 0.5
 
 AGENTS_TO_TEST = [BaseAgent, StrategyAgent]
 # TODO: add Ackley and other binary problem

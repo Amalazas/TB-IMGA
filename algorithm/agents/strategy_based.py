@@ -45,6 +45,13 @@ class TrustMechanism(Enum):
     def __str__(self):
         return self.name
 
+class MigrationPolicy(Enum):
+    Basic = 1
+    TrustBasedRoulette = 2
+    TrustBasedAuction = 3
+
+    def __str__(self):
+        return self.name
 
 class StrategyAgent(BaseAgent):
     # Trust level equal to i means that i-th best solution will be shared - the lower, the better.
