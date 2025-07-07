@@ -1,6 +1,6 @@
 import time
 
-from typing import Callable, Type, Optional, List
+from typing import Callable, Type, Optional, List, Tuple
 
 import pandas as pd
 
@@ -15,7 +15,7 @@ from jmetal.util.generator import Generator
 from jmetal.util.termination_criterion import TerminationCriterion
 
 from algorithm.agents.strategy_based import TrustMechanism
-from analysis.constants_and_params import POPULATION_SIZE
+from analysis.constants_and_params import POPULATION_SIZE, RESTART_TRUST_THRESHOLD
 
 from .agents import AcceptStrategy, BaseAgent, SendStrategy, StrategyAgent
 from .exchange_logic import ExchangeMarket
@@ -107,6 +107,35 @@ class Runner:
         self.generations_per_swap = generations_per_swap
         self.output_file_path = output_file_path
 
+
+    def restart_criterion_met(self) -> Tuple[bool, int]:
+        ### Go through all agent and check whether there is an agent whose average towards it is above the threshold
+        ### (higher value in the agent.trust dictionary means lower trust level towards the agent)
+        
+        average_trusts_per_agent = { agent.id: 0.0 for agent in self.agents }
+        for agent in self.agents:
+            for agent_id, trust in agent.trust.items():
+                average_trusts_per_agent[agent_id] += trust        
+        average_trusts_per_agent = {
+            agent_id: trust / len(self.agents) for agent_id, trust in average_trusts_per_agent.items()
+        }
+        
+        ### Get maximum value and it's key from the average trust values 
+        worst_trust_agent_id = max(average_trusts_per_agent, key=average_trusts_per_agent.get)
+        worst_trust_value = average_trusts_per_agent[worst_trust_agent_id]
+        
+        if worst_trust_value > RESTART_TRUST_THRESHOLD:
+            return True, worst_trust_agent_id
+        else:
+            return False, -1
+
+
+    def restart_agent(self, agent_id) -> None:
+        ### Refresh agent's population - maybe by choosing a couple of good agents and copying or maybe by creating new one based on the previous solutions.
+        ### Also reset the trust values towards other agents.
+        pass
+
+    
     def run_simulation(self):
         start_computing_time = time.time()
 
@@ -168,6 +197,9 @@ class Runner:
 
             if number_of_generations % self.generations_per_swap == 0:
                 self.exchange_market.exchange_information()
+                criterion_met, agent_id = self.restart_criterion_met()
+                if criterion_met:
+                    self.restart_agent(agent_id)
 
         total_computing_time = time.time() - start_computing_time
 

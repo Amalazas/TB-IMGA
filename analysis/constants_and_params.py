@@ -20,6 +20,7 @@ NUM_OF_VARS = 200
 POPULATION_SIZE = 20
 OFFSPRING_POPULATION_SIZE = 10
 STARTING_TRUST = 10
+RESTART_TRUST_THRESHOLD = 20 # 20 would be softcap on the worst possible trust, you can go below that # Should be a fairly difficult value to reach
 GENERATIONS_PER_SWAP = 10
 MAX_EVALUATIONS = 100000
 MIGRATION = True
