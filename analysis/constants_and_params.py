@@ -4,7 +4,7 @@ from algorithm.agents.strategy_based import AcceptStrategy, SendStrategy, TrustM
 from problems import LABS, ExpandedSchaffer, Griewank, Ackley
 from itertools import product
 
-OUTPUT_DIR = "./roulette_test_output"
+OUTPUT_DIR = "./auction_test_output"
 
 PLOTS_DIR = "./graphs"
 BOX_AND_WHISKERS_PLOTS_DIR = f"{PLOTS_DIR}/box_and_whiskers"
@@ -15,18 +15,18 @@ SIGNIFICANCE_LEVEL = 0.05
 NUMBER_OF_ITERATIONS = 9998  # 9998 for 100000 evaluations, 998 for 10000 evaluations
 ITERATION_INTERVAL = 50
 TRUST_MECHANISM = TrustMechanism.Local
-MIGRATION_POLICY = MigrationPolicy.TrustBasedRoulette
+MIGRATION_POLICY = MigrationPolicy.TrustBasedAuction
 NUMBER_OF_RUNS = 10
 NUM_OF_VARS = 100
 POPULATION_SIZE = 20
 OFFSPRING_POPULATION_SIZE = 10
 STARTING_TRUST = 10
 RESTART_TRUST_THRESHOLD = 20 # 20 would be softcap on the worst possible trust, you can go below that # Should be a fairly difficult value to reach
-GENERATIONS_PER_SWAP = 10
+GENERATIONS_PER_SWAP = 100
 MAX_EVALUATIONS = 100000
 MIGRATION = True
 RESTARTING_ENABLED = False
-AGENTS_NUMBER = 24
+AGENTS_NUMBER = 12
 POPULATION_PART_TO_SWAP = 0.1
 NO_SEND_PENALTY = int(POPULATION_SIZE * POPULATION_PART_TO_SWAP)
 AUCTION_TRUST_WEIGHT = 0.5
@@ -35,9 +35,9 @@ AUCTION_SOLUTION_WEIGHT = 0.5
 AGENTS_TO_TEST = [BaseAgent, StrategyAgent]
 # TODO: add Ackley and other binary problem
 PROBLEMS_TO_TEST = [
-    ExpandedSchaffer,
     Griewank,
     Ackley,
+    ExpandedSchaffer,
 ]
 ACCEPT_STRATEGIES_TO_TEST = [
     strategy

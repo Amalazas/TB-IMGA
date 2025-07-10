@@ -49,7 +49,7 @@ class Runner:
         part_to_swap: Optional[float] = 0.1,
         migration: bool = True,
     ):
-        global_trust = {}
+        global_trust = {agent_id: starting_trust for agent_id in range(agents_number)} # Initial trust values for agents
         # In case of a Uniform Agent Class simulation
         if callable(agent_class):
             self.agents = [
@@ -175,8 +175,8 @@ class Runner:
                             agent.accept_strategy.name + "_" + agent.send_strategy.name
                         )
                         trust_string = ""
-                        for trust_agent, trust_level in agent.trust.items():
-                            trust_string += f"{trust_agent.id}:{int(trust_level)}_"
+                        for trust_agent_id, trust_level in agent.trust.items():
+                            trust_string += f"{trust_agent_id}:{int(trust_level)}_"
                         data_to_save["trust"].append(trust_string[:-1])
                     else:
                         data_to_save["class"].append(type(agent).__name__)
@@ -191,6 +191,7 @@ class Runner:
                     pd.DataFrame(data_to_save).to_csv(
                         self.output_file_path, index=False
                     )
+                    self.exchange_market.save_log(''.join(self.output_file_path.split('.')[:-1]) + "_exchange_log.csv")
                     print(f"An error occurred: {e}")
                     print("Program stopped due to an error.")
                     exit()
@@ -205,7 +206,7 @@ class Runner:
         total_computing_time = time.time() - start_computing_time
 
         pd.DataFrame(data_to_save).to_csv(self.output_file_path, index=False)
-        self.exchange_market.save_log(self.output_file_path.split('.')[0] + "_exchange_log.csv")
+        self.exchange_market.save_log(''.join(self.output_file_path.split('.')[:-1]) + "_exchange_log.csv")
 
         for agent in self.agents:
             agent.algorithm.start_computing_time = start_computing_time

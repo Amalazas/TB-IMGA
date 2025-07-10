@@ -1,10 +1,10 @@
 import random
-from numpy import choice as np_choice
 import numpy as np
 import pandas as pd
 from typing import Type, Sequence
 
-from .agents.base import BaseAgent
+from .agents.base import BaseAgent 
+from .agents.strategy_based import StrategyAgent
 from collections import defaultdict
 
 from analysis.constants_and_params import (
@@ -20,15 +20,15 @@ from algorithm.agents.strategy_based import AcceptStrategy
 class ExchangeMarket:
     def __init__(
         self,
-        agents: Sequence[Type[BaseAgent]],
+        agents: Sequence[Type[StrategyAgent | BaseAgent]],
         migration: bool = False,
     ):
         self.migration = migration
         self.log = {}
         self.agents = agents
-        self.id2agent = defaultdict(list)
+        self.id2agent = {}
         for agent in self.agents:
-            self.id2agent[agent.id].append(agent)
+            self.id2agent[agent.id] = agent
 
 
     def exchange_information(self):
@@ -70,9 +70,13 @@ class ExchangeMarket:
                         trust_weights.append(trust)
                         trust_agent_ids.append(agent_id)
                         trust_sum += trust
-                trust_weights = [weight / trust_sum for weight in trust_weights]
                 # Roulette wheel selection
-                paired_agent_id = np_choice(trust_agent_ids, 1, p=trust_weights)[0]
+                if trust_sum != 0: # Normal scenario
+                    trust_weights = [weight / trust_sum for weight in trust_weights]
+                    paired_agent_id = np.random.choice(trust_agent_ids, 1, p=trust_weights)[0]
+                else: # Scenario in which every remaining agent has max trust (equal 0), so we select with uniform distribution
+                    paired_agent_id = np.random.choice(trust_agent_ids, 1)[0]
+
                 # Remove the paired agent from the list of available agents and save the pair
                 agent_ids.remove(paired_agent_id)
                 paired_agents.append(
@@ -143,7 +147,7 @@ class ExchangeMarket:
                 agent_ids.remove(best_agent_id)
                 # Logging
                 auction_string += f"{base_agent_id}:"
-                for id, bid in sorted(trust_weights, reverse=True, key=lambda x: x[1]):
+                for id, bid in sorted(agent_bids, reverse=True, key=lambda x: x[1]):
                     auction_string += f"({id}-{bid:.2f})_"
                 auction_string = auction_string[:-1] + '|'
                 pair_string += f"{base_agent_id}:{best_agent_id}_"  
@@ -153,13 +157,13 @@ class ExchangeMarket:
         ### Migration
         for agent1, agent2 in paired_agents:
             starting_population_size = len(agent1.algorithm.solutions)
-            agent1_solutions = agent1.get_solutions_to_share(agent2)
-            agent2_solutions = agent2.get_solutions_to_share(agent1)
+            agent1_solutions = agent1.get_solutions_to_share(agent2.id)
+            agent2_solutions = agent2.get_solutions_to_share(agent1.id)
             if self.migration:
                 agent1.remove_solutions(agent1_solutions)
                 agent2.remove_solutions(agent2_solutions)
-            agent1.use_shared_solutions(agent2_solutions, agent2, starting_population_size)
-            agent2.use_shared_solutions(agent1_solutions, agent1, starting_population_size)
+            agent1.use_shared_solutions(agent2_solutions, agent2.id, starting_population_size)
+            agent2.use_shared_solutions(agent1_solutions, agent1.id, starting_population_size)
 
 
     def save_log(self, log_file_path: str):

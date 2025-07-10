@@ -83,18 +83,21 @@ class StrategyAgent(BaseAgent):
             self.trust = trust
         elif trust_mechanism is TrustMechanism.Local:
             self.trust = deepcopy(trust)
+            # # Delete key with self.id if it exists
+            # if self.id in self.trust:
+            #     del self.trust[self.id] 
         else:
             assert False, "Unhandled case"
 
-    def get_solutions_to_share(self, agent_to_share_with) -> list[Solution]:
+    def get_solutions_to_share(self, agent_id_to_share_with) -> list[Solution]:
         number_of_solutions = len(self.algorithm.solutions)
         solutions_to_share = ceil(number_of_solutions * self.part_to_swap)
 
         if self.trust is not None:
-            if agent_to_share_with not in self.trust:
-                self.trust[agent_to_share_with] = self.starting_trust
+            if agent_id_to_share_with not in self.trust:
+                self.trust[agent_id_to_share_with] = self.starting_trust
 
-            trust_lvl = self.trust[agent_to_share_with]
+            trust_lvl = self.trust[agent_id_to_share_with]
 
             index_of_best_solution_to_share = (
                 trust_lvl
@@ -139,7 +142,7 @@ class StrategyAgent(BaseAgent):
     def use_shared_solutions(
         self,
         shared_solutions: list[Solution],
-        agent_sharing_the_solution,
+        agent_id_sharing_the_solution,
         starting_population_size,
     ):
         if self.accept_strategy is AcceptStrategy.Always:
@@ -162,8 +165,8 @@ class StrategyAgent(BaseAgent):
                 : self.algorithm.population_size
             ]
             if self.trust is not None:
-                if agent_sharing_the_solution not in self.trust:
-                    self.trust[agent_sharing_the_solution] = (
+                if agent_id_sharing_the_solution not in self.trust:
+                    self.trust[agent_id_sharing_the_solution] = (
                         self.__class__.MAX_TRUST_LEVEL
                     )
 
@@ -179,9 +182,9 @@ class StrategyAgent(BaseAgent):
                 else:
                     trust_change = self.no_send_penalty
 
-                self.trust[agent_sharing_the_solution] = max(
+                self.trust[agent_id_sharing_the_solution] = max(
                     self.__class__.MAX_TRUST_LEVEL,
-                    self.trust[agent_sharing_the_solution] + trust_change,
+                    self.trust[agent_id_sharing_the_solution] + trust_change,
                 )
 
         elif self.accept_strategy is AcceptStrategy.Reject:
@@ -197,8 +200,8 @@ class StrategyAgent(BaseAgent):
             )
 
             if self.trust is not None:
-                if agent_sharing_the_solution not in self.trust:
-                    self.trust[agent_sharing_the_solution] = (
+                if agent_id_sharing_the_solution not in self.trust:
+                    self.trust[agent_id_sharing_the_solution] = (
                         self.__class__.MAX_TRUST_LEVEL
                     )
 
@@ -214,9 +217,9 @@ class StrategyAgent(BaseAgent):
                 else:
                     trust_change = self.no_send_penalty
 
-                self.trust[agent_sharing_the_solution] = max(
+                self.trust[agent_id_sharing_the_solution] = max(
                     self.__class__.MAX_TRUST_LEVEL,
-                    self.trust[agent_sharing_the_solution] + trust_change,
+                    self.trust[agent_id_sharing_the_solution] + trust_change,
                 )
 
         """
