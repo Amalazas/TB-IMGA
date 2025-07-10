@@ -2,8 +2,9 @@ from algorithm.agents import StrategyAgent, AgentWithTrust
 from algorithm.agents.base import BaseAgent
 from algorithm.agents.strategy_based import AcceptStrategy, SendStrategy, TrustMechanism, MigrationPolicy
 from problems import LABS, ExpandedSchaffer, Griewank, Ackley
+from itertools import product
 
-OUTPUT_DIR = "./new_output"
+OUTPUT_DIR = "./roulette_test_output"
 
 PLOTS_DIR = "./graphs"
 BOX_AND_WHISKERS_PLOTS_DIR = f"{PLOTS_DIR}/box_and_whiskers"
@@ -14,9 +15,9 @@ SIGNIFICANCE_LEVEL = 0.05
 NUMBER_OF_ITERATIONS = 9998  # 9998 for 100000 evaluations, 998 for 10000 evaluations
 ITERATION_INTERVAL = 50
 TRUST_MECHANISM = TrustMechanism.Local
-MIGRATION_POLICY = MigrationPolicy.Basic
+MIGRATION_POLICY = MigrationPolicy.TrustBasedRoulette
 NUMBER_OF_RUNS = 10
-NUM_OF_VARS = 200
+NUM_OF_VARS = 100
 POPULATION_SIZE = 20
 OFFSPRING_POPULATION_SIZE = 10
 STARTING_TRUST = 10
@@ -106,10 +107,21 @@ accept_strategies = []
 #     accept_strategies.append(AcceptStrategy.Different)
 
 """All different mixes."""
-for send_strategy in SendStrategy:
-    for accept_strategy in AcceptStrategy:
+# for send_strategy in SendStrategy:
+#     for accept_strategy in AcceptStrategy:
+#         agents.append(StrategyAgent)
+#         send_strategies.append(send_strategy)
+#         accept_strategies.append(accept_strategy)
+
+""" 3 per type - reasonable ones"""
+for (send_strategy, accept_strategy) in product(
+    [SendStrategy.Outlying, SendStrategy.Best],
+    [AcceptStrategy.Better, AcceptStrategy.Different],
+):
+    for _ in range(3):
         agents.append(StrategyAgent)
         send_strategies.append(send_strategy)
         accept_strategies.append(accept_strategy)
+
 
 MULTI_CLASS_SETUP = [agents, send_strategies, accept_strategies]

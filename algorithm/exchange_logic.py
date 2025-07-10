@@ -1,6 +1,7 @@
 import random
 from numpy import choice as np_choice
 import numpy as np
+import pandas as pd
 from typing import Type, Sequence
 
 from .agents.base import BaseAgent
@@ -23,15 +24,20 @@ class ExchangeMarket:
         migration: bool = False,
     ):
         self.migration = migration
+        self.log = {}
         self.agents = agents
         self.id2agent = defaultdict(list)
         for agent in self.agents:
             self.id2agent[agent.id].append(agent)
 
+
     def exchange_information(self):
         
         ### Agent pairing
         paired_agents = []
+        pair_string = ""
+        if 'pairs' not in self.log:
+                self.log['pairs'] = []
 
         # Pairing based on random selection
         if MIGRATION_POLICY is MigrationPolicy.Basic:
@@ -41,9 +47,15 @@ class ExchangeMarket:
                 paired_agents.append( 
                     (self.agents[shuffled_agent_list_ids[i]], self.agents[shuffled_agent_list_ids[i + 1]])
                 )
-        
+                # Logging
+                pair_string += f"{shuffled_agent_list_ids[i]}:{shuffled_agent_list_ids[i + 1]}_"
+            self.log['pairs'].append(pair_string[:-1])
+                    
         # Pairing based on random trust-weighted selection
         elif MIGRATION_POLICY is MigrationPolicy.TrustBasedRoulette:
+            roulette_string = ""
+            if 'roulette' not in self.log:
+                self.log['roulette'] = []
             agent_ids = [ agent.id for agent in self.agents ]
             while len(agent_ids) > 1:
                 # Select a base agent randomly
@@ -66,9 +78,20 @@ class ExchangeMarket:
                 paired_agents.append(
                     (self.id2agent[base_agent_id], self.id2agent[paired_agent_id])
                     )
+                # Logging
+                pair_string += f"{base_agent_id}:{paired_agent_id}_"    
+                roulette_string += f"{base_agent_id}:"
+                for id, weight in sorted( [(trust_agent_ids[i], trust_weights[i]) for i in range(len(trust_weights))] , reverse=True, key=lambda x: x[1]):
+                    roulette_string += f"<{id}-{weight:.2f}>_"
+                roulette_string = roulette_string[:-1] + '|'
+            self.log['pairs'].append(pair_string[:-1])
+            self.log['roulette'].append(roulette_string[:-1])
 
         # Pairing based on trust and quality auction
         elif MIGRATION_POLICY is MigrationPolicy.TrustBasedAuction:
+            auction_string = ""
+            if 'auction' not in self.log:
+                self.log['auction'] = []
             agent_ids = [ agent.id for agent in self.agents ]
             while len(agent_ids) > 1:
                 ### Select a base agent randomly
@@ -118,7 +141,14 @@ class ExchangeMarket:
                 best_agent_id = max(agent_bids, key=lambda x: x[1])[0]
                 paired_agents.append((self.id2agent[base_agent_id], self.id2agent[best_agent_id]))
                 agent_ids.remove(best_agent_id)
-
+                # Logging
+                auction_string += f"{base_agent_id}:"
+                for id, bid in sorted(trust_weights, reverse=True, key=lambda x: x[1]):
+                    auction_string += f"({id}-{bid:.2f})_"
+                auction_string = auction_string[:-1] + '|'
+                pair_string += f"{base_agent_id}:{best_agent_id}_"  
+            self.log['pairs'].append(pair_string[:-1])
+            self.log['auction'].append(auction_string[:-1])
 
         ### Migration
         for agent1, agent2 in paired_agents:
@@ -130,3 +160,7 @@ class ExchangeMarket:
                 agent2.remove_solutions(agent2_solutions)
             agent1.use_shared_solutions(agent2_solutions, agent2, starting_population_size)
             agent2.use_shared_solutions(agent1_solutions, agent1, starting_population_size)
+
+
+    def save_log(self, log_file_path: str):
+        pd.DataFrame(self.log).to_csv(log_file_path, index=False)

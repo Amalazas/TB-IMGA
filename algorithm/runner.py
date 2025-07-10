@@ -177,7 +177,7 @@ class Runner:
                         trust_string = ""
                         for trust_agent, trust_level in agent.trust.items():
                             trust_string += f"{trust_agent.id}:{int(trust_level)}_"
-                        data_to_save["trust"].append(trust_string)
+                        data_to_save["trust"].append(trust_string[:-1])
                     else:
                         data_to_save["class"].append(type(agent).__name__)
                         data_to_save["trust"].append("not_applicable")
@@ -197,14 +197,15 @@ class Runner:
 
             if number_of_generations % self.generations_per_swap == 0:
                 self.exchange_market.exchange_information()
-                if RESTARTING_ENABLED:
-                    criterion_met, agent_id = self.restart_criterion_met()
-                    if criterion_met:
-                        self.restart_agent(agent_id)
+                # if RESTARTING_ENABLED:
+                #     criterion_met, agent_id = self.restart_criterion_met()
+                #     if criterion_met:
+                #         self.restart_agent(agent_id)
 
         total_computing_time = time.time() - start_computing_time
 
         pd.DataFrame(data_to_save).to_csv(self.output_file_path, index=False)
+        self.exchange_market.save_log(self.output_file_path.split('.')[0] + "_exchange_log.csv")
 
         for agent in self.agents:
             agent.algorithm.start_computing_time = start_computing_time

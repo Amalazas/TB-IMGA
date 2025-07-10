@@ -50,7 +50,7 @@ def plot_and_save_average_agent_class_trust_in_training():
         for _, row in generation_df.iterrows():
             agent_id = row["agent_id"]
             class_from = agent_id_to_class[agent_id]
-            trust_entries = [tr.split(":") for tr in row["trust"][:-1].split("_")]
+            trust_entries = [tr.split(":") for tr in row["trust"].split("_")]
             trust_per_id = {int(agent): int(trust) for agent, trust in trust_entries}
             for agent, trust in trust_per_id.items():
                 class_to = agent_id_to_class[agent]
