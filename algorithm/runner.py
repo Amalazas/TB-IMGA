@@ -15,7 +15,7 @@ from jmetal.util.generator import Generator
 from jmetal.util.termination_criterion import TerminationCriterion
 
 from algorithm.agents.strategy_based import TrustMechanism
-from analysis.constants_and_params import POPULATION_SIZE, RESTART_TRUST_THRESHOLD
+from analysis.constants_and_params import POPULATION_SIZE, RESTART_TRUST_THRESHOLD, RESTARTING_ENABLED
 
 from .agents import AcceptStrategy, BaseAgent, SendStrategy, StrategyAgent
 from .exchange_logic import ExchangeMarket
@@ -109,6 +109,7 @@ class Runner:
 
 
     def restart_criterion_met(self) -> Tuple[bool, int]:
+        ### OLD IDEA, CURRENTLY NOT USED
         ### Go through all agent and check whether there is an agent whose average towards it is above the threshold
         ### (higher value in the agent.trust dictionary means lower trust level towards the agent)
         
@@ -131,8 +132,7 @@ class Runner:
 
 
     def restart_agent(self, agent_id) -> None:
-        ### Refresh agent's population - maybe by choosing a couple of good agents and copying or maybe by creating new one based on the previous solutions.
-        ### Also reset the trust values towards other agents.
+        ### OLD IDEA, CURRENTLY NOT USED
         pass
 
     
@@ -197,9 +197,10 @@ class Runner:
 
             if number_of_generations % self.generations_per_swap == 0:
                 self.exchange_market.exchange_information()
-                criterion_met, agent_id = self.restart_criterion_met()
-                if criterion_met:
-                    self.restart_agent(agent_id)
+                if RESTARTING_ENABLED:
+                    criterion_met, agent_id = self.restart_criterion_met()
+                    if criterion_met:
+                        self.restart_agent(agent_id)
 
         total_computing_time = time.time() - start_computing_time
 
