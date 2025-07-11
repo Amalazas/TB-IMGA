@@ -4,7 +4,7 @@ from algorithm.agents.strategy_based import AcceptStrategy, SendStrategy, TrustM
 from problems import LABS, ExpandedSchaffer, Griewank, Ackley
 from itertools import product
 
-OUTPUT_DIR = "./auction_test_output"
+OUTPUT_DIR = "./test_output"
 
 PLOTS_DIR = "./graphs"
 BOX_AND_WHISKERS_PLOTS_DIR = f"{PLOTS_DIR}/box_and_whiskers"
@@ -16,7 +16,7 @@ NUMBER_OF_ITERATIONS = 9998  # 9998 for 100000 evaluations, 998 for 10000 evalua
 ITERATION_INTERVAL = 50
 TRUST_MECHANISM = TrustMechanism.Local
 MIGRATION_POLICY = MigrationPolicy.TrustBasedAuction
-NUMBER_OF_RUNS = 10
+NUMBER_OF_RUNS = 1
 NUM_OF_VARS = 100
 POPULATION_SIZE = 20
 OFFSPRING_POPULATION_SIZE = 10

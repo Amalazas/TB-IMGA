@@ -191,7 +191,7 @@ class Runner:
                     pd.DataFrame(data_to_save).to_csv(
                         self.output_file_path, index=False
                     )
-                    self.exchange_market.save_log(''.join(self.output_file_path.split('.')[:-1]) + "_exchange_log.csv")
+                    self.exchange_market.save_log("." + ''.join(self.output_file_path.split('.')[:-1]) + "_exchange_log.csv")
                     print(f"An error occurred: {e}")
                     print("Program stopped due to an error.")
                     exit()
@@ -206,7 +206,7 @@ class Runner:
         total_computing_time = time.time() - start_computing_time
 
         pd.DataFrame(data_to_save).to_csv(self.output_file_path, index=False)
-        self.exchange_market.save_log(''.join(self.output_file_path.split('.')[:-1]) + "_exchange_log.csv")
+        self.exchange_market.save_log("." + ''.join(self.output_file_path.split('.')[:-1]) + "_exchange_log.csv")
 
         for agent in self.agents:
             agent.algorithm.start_computing_time = start_computing_time

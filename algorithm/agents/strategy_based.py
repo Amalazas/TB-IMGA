@@ -94,8 +94,8 @@ class StrategyAgent(BaseAgent):
         solutions_to_share = ceil(number_of_solutions * self.part_to_swap)
 
         if self.trust is not None:
-            if agent_id_to_share_with not in self.trust:
-                self.trust[agent_id_to_share_with] = self.starting_trust
+            # if agent_id_to_share_with not in self.trust:
+            #     self.trust[agent_id_to_share_with] = self.starting_trust
 
             trust_lvl = self.trust[agent_id_to_share_with]
 
@@ -165,10 +165,10 @@ class StrategyAgent(BaseAgent):
                 : self.algorithm.population_size
             ]
             if self.trust is not None:
-                if agent_id_sharing_the_solution not in self.trust:
-                    self.trust[agent_id_sharing_the_solution] = (
-                        self.__class__.MAX_TRUST_LEVEL
-                    )
+                # if agent_id_sharing_the_solution not in self.trust:
+                #     self.trust[agent_id_sharing_the_solution] = (
+                #         self.starting_trust
+                #     )
 
                 trust_change = 0
                 if len(shared_solutions) > 0:
@@ -200,10 +200,10 @@ class StrategyAgent(BaseAgent):
             )
 
             if self.trust is not None:
-                if agent_id_sharing_the_solution not in self.trust:
-                    self.trust[agent_id_sharing_the_solution] = (
-                        self.__class__.MAX_TRUST_LEVEL
-                    )
+                # if agent_id_sharing_the_solution not in self.trust:
+                #     self.trust[agent_id_sharing_the_solution] = (
+                #         self.starting_trust
+                #     )
 
                 if len(shared_solutions) > 0:
                     trust_change = 0

@@ -103,7 +103,7 @@ class ExchangeMarket:
                 agent_ids.remove(base_agent_id)
                 ### Collecting proposals from other agents and their trust towards the selected base agent
                 proposed_solutions = [ 
-                    (agent.id, agent.get_solutions_to_share(self.id2agent[base_agent_id])) for agent in self.agents if agent.id in agent_ids 
+                    (agent.id, agent.get_solutions_to_share(base_agent_id)) for agent in self.agents if agent.id in agent_ids 
                     ]
                 trust_towards_base_agent = [
                     (agent.id, agent.trust[base_agent_id]) for agent in self.agents if agent.id in agent_ids
@@ -112,7 +112,7 @@ class ExchangeMarket:
                 # Trust
                 trust_min, trust_max = min(trust_towards_base_agent, key=lambda x: x[1])[1], max(trust_towards_base_agent, key=lambda x: x[1])[1]
                 normalized_trust = [
-                    (agent_id, (trust - trust_min) / (trust_max - trust_min)) for agent_id, trust in trust_towards_base_agent
+                    (agent_id, (trust - trust_min) / max((trust_max - trust_min), 1)) for agent_id, trust in trust_towards_base_agent
                 ]
                 # Quality
                 normalized_quality = []
@@ -130,7 +130,7 @@ class ExchangeMarket:
                 elif self.id2agent[base_agent_id].accept_strategy is AcceptStrategy.Different:
                     # Diversity Scores - the absolute value of the dot product calculated on the mean base agent vector and mean proposed solution vector - the higher the value, the better
                     avg_solution_diversity = []
-                    base_agent_variables_mean = np.array([solution.variables for solution in self.id2agent[base_agent_id].solutions]).mean(axis=0)
+                    base_agent_variables_mean = np.array([solution.variables for solution in self.id2agent[base_agent_id].algorithm.solutions]).mean(axis=0)
                     for agent_id, solutions in proposed_solutions:
                         dot_products = [ np.dot(solution.variables, base_agent_variables_mean) for solution in solutions ]
                         avg_diversity = np.sum(np.abs(dot_products)) / len(solutions) if solutions else 0
