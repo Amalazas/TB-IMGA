@@ -1,0 +1,7 @@
+crossover_rate          "--cross_rate "   r     (0.01, 0.99)
+mutation_rate           "--mut_rate "     r     (0.01, 0.99)
+migration_pop_rate      "--mp_rate "      r     (0.01, 0.99)
+migration_interval      "--mig_inter "    i     (1, 100)
+
+[global]
+digits = 2

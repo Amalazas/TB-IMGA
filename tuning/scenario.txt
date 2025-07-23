@@ -1,0 +1,7 @@
+maxExperiments = 100
+trainInstancesDir = ""
+trainInstancesFile = "./instances.txt"
+parameterFile = "./parameters.txt"
+targetRunnerLauncher = "./target-runner-launcher.bat"
+targetRunner = "./target-runner.py"
+logFile = "./logs/irace.Rdata"

@@ -9,13 +9,13 @@ OUTPUT_DIR = "./test_output"
 PLOTS_DIR = "./graphs"
 BOX_AND_WHISKERS_PLOTS_DIR = f"{PLOTS_DIR}/box_and_whiskers"
 MEAN_PLOTS_DIR = f"{PLOTS_DIR}/mean"
-MULTI_CLASS_PLOTS_DIR = f"{PLOTS_DIR}/PERF_200vars_migration_local_trust"
+MULTI_CLASS_PLOTS_DIR = f"{PLOTS_DIR}/PERF_100vars_migration_local_trust"
 
 SIGNIFICANCE_LEVEL = 0.05
 NUMBER_OF_ITERATIONS = 9998  # 9998 for 100000 evaluations, 998 for 10000 evaluations
 ITERATION_INTERVAL = 50
 TRUST_MECHANISM = TrustMechanism.Local
-MIGRATION_POLICY = MigrationPolicy.TrustBasedAuction
+MIGRATION_POLICY = MigrationPolicy.Basic
 NUMBER_OF_RUNS = 1
 NUM_OF_VARS = 100
 POPULATION_SIZE = 20

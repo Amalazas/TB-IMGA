@@ -164,7 +164,6 @@ class ExchangeMarket:
                 agent2.remove_solutions(agent2_solutions)
             agent1.use_shared_solutions(agent2_solutions, agent2.id, starting_population_size)
             agent2.use_shared_solutions(agent1_solutions, agent1.id, starting_population_size)
-
-
+                
     def save_log(self, log_file_path: str):
         pd.DataFrame(self.log).to_csv(log_file_path, index=False)

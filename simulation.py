@@ -8,6 +8,8 @@ from jmetal.operator.crossover import SBXCrossover, SPXCrossover
 from jmetal.operator.mutation import SimpleRandomMutation, BitFlipMutation
 from jmetal.util.termination_criterion import StoppingByEvaluations
 
+from problems import ExpandedSchaffer, Griewank, Ackley
+
 from algorithm import Runner
 from algorithm.agents.base import BaseAgent
 from analysis.constants_and_params import (
@@ -51,10 +53,14 @@ def run_simulations_and_save_results():
 
         for problem in [problem_type(NUM_OF_VARS) for problem_type in PROBLEMS_TO_TEST]:
             """BASE AGENT CLASS SIMULATION"""
-            # output_file_path = (
-            #     f"{OUTPUT_DIR}/{BaseAgent.name()}_{problem.name()}_{current_date}.csv"
-            # )
-            # run_single_simulation(BaseAgent, problem, output_file_path, None, None)
+            output_file_path = (
+                f"{OUTPUT_DIR}/{BaseAgent.name()}_{problem.name()}_{current_date}.csv"
+            )
+            best_result = run_single_simulation(BaseAgent, problem, output_file_path, None, None)
+            print(
+                f"Best result for {output_file_path}:",
+                best_result,
+            )
 
             """SINGLE AGENT CLASS SIMULATION"""
             # for agent_class in AGENTS_TO_TEST:
@@ -76,14 +82,14 @@ def run_simulations_and_save_results():
             #         )
 
             """ MULTI AGENT CLASS SIMULATION """
-            dir = f"{custom_output}/{problem.name()}"
-            os.makedirs(dir, exist_ok=True)
-            output_file_path = (
-                f"{dir}/CustomMultiClass_{problem.name()}_{current_date}.csv"
-            )
-            run_single_simulation(
-                agents, problem, output_file_path, accept_strategies, send_strategies
-            )
+            # dir = f"{custom_output}/{problem.name()}"
+            # os.makedirs(dir, exist_ok=True)
+            # output_file_path = (
+            #     f"{dir}/CustomMultiClass_{problem.name()}_{current_date}.csv"
+            # )
+            # run_single_simulation(
+            #     agents, problem, output_file_path, accept_strategies, send_strategies
+            # )
 
 
 def run_single_simulation(
@@ -92,22 +98,26 @@ def run_single_simulation(
     output_file_path,
     accept_strategy,
     send_strategy,
+    crossover_rate=0.5,
+    mutation_rate=0.5,
+    migration_pop_rate=POPULATION_PART_TO_SWAP,
+    migration_interval=GENERATIONS_PER_SWAP,
 ):
-    print(output_file_path)
+    # print(output_file_path)
     mutation = (
-        BitFlipMutation(0.5)
+        BitFlipMutation(mutation_rate)
         if isinstance(problem, BinaryProblem)
-        else SimpleRandomMutation(0.5)
+        else SimpleRandomMutation(mutation_rate)
     )
     crossover = (
-        SPXCrossover(0.5) if isinstance(problem, BinaryProblem) else SBXCrossover(0.5)
+        SPXCrossover(crossover_rate) if isinstance(problem, BinaryProblem) else SBXCrossover(crossover_rate)
     )
 
     runner = Runner(
         output_file_path=output_file_path,
         agent_class=agent_class,
         agents_number=AGENTS_NUMBER,  # Needed only for single class, non strategy based agents
-        generations_per_swap=GENERATIONS_PER_SWAP,
+        generations_per_swap=migration_interval,
         problem=deepcopy(problem),
         population_size=POPULATION_SIZE,
         offspring_population_size=OFFSPRING_POPULATION_SIZE,
@@ -121,14 +131,22 @@ def run_single_simulation(
         trust_mechanism=TRUST_MECHANISM,
         starting_trust=STARTING_TRUST,
         no_send_penalty=NO_SEND_PENALTY,
-        part_to_swap=POPULATION_PART_TO_SWAP,
+        part_to_swap=migration_pop_rate,
     )
     runner.run_simulation()
 
-    print(
-        f"Best result for {output_file_path}:",
-        min(agent.algorithm.result().objectives[0] for agent in runner.agents),
-    )
+    best_result = min(agent.algorithm.result().objectives[0] for agent in runner.agents)
+    # print(
+    #     f"Best result for {output_file_path}:",
+    #     best_result,
+    # )
+    
+    return best_result
+
+
+def run_irace_compatible_base_simulation(crossover_rate, mutation_rate, migration_pop_rate, migration_interval):
+    problem = Griewank(NUM_OF_VARS)  
+    return run_single_simulation(BaseAgent, problem, "./trash/last_log", None, None, crossover_rate, mutation_rate, migration_pop_rate, migration_interval)
 
 
 if __name__ == "__main__":
