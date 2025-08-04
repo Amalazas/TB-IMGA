@@ -102,6 +102,7 @@ def run_single_simulation(
     mutation_rate=0.5,
     migration_pop_rate=POPULATION_PART_TO_SWAP,
     migration_interval=GENERATIONS_PER_SWAP,
+    save_log=True,
 ):
     # print(output_file_path)
     mutation = (
@@ -132,6 +133,7 @@ def run_single_simulation(
         starting_trust=STARTING_TRUST,
         no_send_penalty=NO_SEND_PENALTY,
         part_to_swap=migration_pop_rate,
+        save_log=save_log,
     )
     runner.run_simulation()
 
@@ -146,7 +148,7 @@ def run_single_simulation(
 
 def run_irace_compatible_base_simulation(crossover_rate, mutation_rate, migration_pop_rate, migration_interval):
     problem = Griewank(NUM_OF_VARS)  
-    return run_single_simulation(BaseAgent, problem, "./trash/last_log", None, None, crossover_rate, mutation_rate, migration_pop_rate, migration_interval)
+    return run_single_simulation(BaseAgent, problem, "", None, None, crossover_rate, mutation_rate, migration_pop_rate, migration_interval, save_log=False)
 
 
 if __name__ == "__main__":

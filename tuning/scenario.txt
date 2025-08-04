@@ -1,7 +1,7 @@
-maxExperiments = 100
+maxExperiments = 180
 trainInstancesDir = ""
 trainInstancesFile = "./instances.txt"
 parameterFile = "./parameters.txt"
 targetRunnerLauncher = "./target-runner-launcher.bat"
 targetRunner = "./target-runner.py"
-logFile = "./logs/irace.Rdata"
+logFile = "./logs/LongGriewank_irace.Rdata"

@@ -48,6 +48,7 @@ class Runner:
         no_send_penalty: Optional[int] = 2,
         part_to_swap: Optional[float] = 0.1,
         migration: bool = True,
+        save_log: bool = True,
     ):
         global_trust = {agent_id: starting_trust for agent_id in range(agents_number)} # Initial trust values for agents
         # In case of a Uniform Agent Class simulation
@@ -106,6 +107,7 @@ class Runner:
         self.exchange_market = ExchangeMarket(self.agents, migration)
         self.generations_per_swap = generations_per_swap
         self.output_file_path = output_file_path
+        self.save_log = save_log
 
 
     def restart_criterion_met(self) -> Tuple[bool, int]:
@@ -182,16 +184,19 @@ class Runner:
                         data_to_save["class"].append(type(agent).__name__)
                         data_to_save["trust"].append("not_applicable")
                 except KeyboardInterrupt:
-                    pd.DataFrame(data_to_save).to_csv(
-                        self.output_file_path, index=False
-                    )
+                    if self.save_log:
+                        pd.DataFrame(data_to_save).to_csv(
+                            self.output_file_path, index=False
+                        )
+                        self.exchange_market.save_log("." + ''.join(self.output_file_path.split('.')[:-1]) + "_exchange_log.csv")
                     print("Program stopped by user.")
                     exit()
                 except Exception as e:
-                    pd.DataFrame(data_to_save).to_csv(
-                        self.output_file_path, index=False
-                    )
-                    self.exchange_market.save_log("." + ''.join(self.output_file_path.split('.')[:-1]) + "_exchange_log.csv")
+                    if self.save_log:
+                        pd.DataFrame(data_to_save).to_csv(
+                            self.output_file_path, index=False
+                        )
+                        self.exchange_market.save_log("." + ''.join(self.output_file_path.split('.')[:-1]) + "_exchange_log.csv")
                     print(f"An error occurred: {e}")
                     print("Program stopped due to an error.")
                     exit()
@@ -205,8 +210,9 @@ class Runner:
 
         total_computing_time = time.time() - start_computing_time
 
-        pd.DataFrame(data_to_save).to_csv(self.output_file_path, index=False)
-        self.exchange_market.save_log("." + ''.join(self.output_file_path.split('.')[:-1]) + "_exchange_log.csv")
+        if self.save_log:
+            pd.DataFrame(data_to_save).to_csv(self.output_file_path, index=False)
+            self.exchange_market.save_log("." + ''.join(self.output_file_path.split('.')[:-1]) + "_exchange_log.csv")
 
         for agent in self.agents:
             agent.algorithm.start_computing_time = start_computing_time

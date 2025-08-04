@@ -13,7 +13,7 @@ MULTI_CLASS_PLOTS_DIR = f"{PLOTS_DIR}/PERF_100vars_migration_local_trust"
 
 SIGNIFICANCE_LEVEL = 0.05
 NUMBER_OF_ITERATIONS = 9998  # 9998 for 100000 evaluations, 998 for 10000 evaluations
-ITERATION_INTERVAL = 50
+ITERATION_INTERVAL = 50  # For plotting results only
 TRUST_MECHANISM = TrustMechanism.Local
 MIGRATION_POLICY = MigrationPolicy.Basic
 NUMBER_OF_RUNS = 1
@@ -26,7 +26,7 @@ GENERATIONS_PER_SWAP = 100
 MAX_EVALUATIONS = 100000
 MIGRATION = True
 RESTARTING_ENABLED = False
-AGENTS_NUMBER = 12
+AGENTS_NUMBER = 12 # For some reason, needs to be set to the final number of agents you've specified below
 POPULATION_PART_TO_SWAP = 0.1
 NO_SEND_PENALTY = int(POPULATION_SIZE * POPULATION_PART_TO_SWAP)
 AUCTION_TRUST_WEIGHT = 0.5
@@ -54,16 +54,16 @@ SEND_STRATEGIES_TO_TEST = [
 # the order of agents consistent between
 # the problem types.
 EXPERIMENTS = []
-for problem in PROBLEMS_TO_TEST:
-    for agent in AGENTS_TO_TEST:
-        if agent is StrategyAgent:
-            for accept_strategy in ACCEPT_STRATEGIES_TO_TEST:
-                for send_strategy in SEND_STRATEGIES_TO_TEST:
-                    EXPERIMENTS.append(
-                        f"{agent.name()}_{accept_strategy}_{send_strategy}_{problem.name()}"
-                    )
-        else:
-            EXPERIMENTS.append(f"{agent.name()}_{problem.name()}")
+# for problem in PROBLEMS_TO_TEST:
+#     for agent in AGENTS_TO_TEST:
+#         if agent is StrategyAgent:
+#             for accept_strategy in ACCEPT_STRATEGIES_TO_TEST:
+#                 for send_strategy in SEND_STRATEGIES_TO_TEST:
+#                     EXPERIMENTS.append(
+#                         f"{agent.name()}_{accept_strategy}_{send_strategy}_{problem.name()}"
+#                     )
+#         else:
+#             EXPERIMENTS.append(f"{agent.name()}_{problem.name()}")
 
 # CUSTOM MULTI CLASS CONFIG (leave one config uncommented if you want to run it)
 agents = []
