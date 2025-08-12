@@ -72,11 +72,12 @@ class ExchangeMarket:
                         trust_sum += trust
                 # Roulette wheel selection
                 if trust_sum != 0: # Normal scenario
-                    trust_weights = [weight / trust_sum for weight in trust_weights]
+                    # Calculation of trust ratios as weights (the higher trust value, the lower chance of being selected)
+                    trust_weights = [ 1 - (weight / trust_sum) for weight in trust_weights ] # 1 - portion of all trust
+                    trust_weights = [ weight / sum(trust_weights) for weight in trust_weights ] # Normalize to sum to 1
                     paired_agent_id = np.random.choice(trust_agent_ids, 1, p=trust_weights)[0]
                 else: # Scenario in which every remaining agent has max trust (equal 0), so we select with uniform distribution
                     paired_agent_id = np.random.choice(trust_agent_ids, 1)[0]
-
                 # Remove the paired agent from the list of available agents and save the pair
                 agent_ids.remove(paired_agent_id)
                 paired_agents.append(
@@ -111,9 +112,11 @@ class ExchangeMarket:
                 ### Normalization of trust and quality scores plus auction value calculation (min-max normalization)
                 # Trust
                 trust_min, trust_max = min(base_agent_trust, key=lambda x: x[1])[1], max(base_agent_trust, key=lambda x: x[1])[1]
+                # final normalized_trust equals (1 - basic normalized_trust) to reverse the scale, as lower scores are better 
                 normalized_trust = [
-                    (agent_id, (trust - trust_min) / max((trust_max - trust_min), 1)) for agent_id, trust in base_agent_trust
+                    (agent_id, 1 - ((trust - trust_min) / max((trust_max - trust_min), 1))) for agent_id, trust in base_agent_trust
                 ]
+                
                 # Quality
                 normalized_quality = []
                 if self.id2agent[base_agent_id].accept_strategy is AcceptStrategy.Better:
@@ -123,9 +126,9 @@ class ExchangeMarket:
                         avg_score = sum(solution.objectives[0] for solution in solutions) / len(solutions) if solutions else 0
                         avg_solution_scores.append((agent_id, avg_score))
                     score_min, score_max = min(avg_solution_scores, key=lambda x: x[1])[1], max(avg_solution_scores, key=lambda x: x[1])[1]
-                    # normalized_quality equals (1 - normalized_score) to reverse the scale, as lower scores are better
+                    # normalized_quality equals (1 - basic normalized_score) to reverse the scale, as lower scores are better
                     normalized_quality = [
-                        (agent_id, 1-((score - score_min) / (score_max - score_min)) ) for agent_id, score in avg_solution_scores
+                        (agent_id, 1 - ((score - score_min) / (score_max - score_min)) ) for agent_id, score in avg_solution_scores
                     ]
                 elif self.id2agent[base_agent_id].accept_strategy is AcceptStrategy.Different:
                     # Diversity Scores - the absolute value of the dot product calculated on the mean base agent vector and mean proposed solution vector - the higher the value, the better
@@ -133,9 +136,10 @@ class ExchangeMarket:
                     base_agent_variables_mean = np.array([solution.variables for solution in self.id2agent[base_agent_id].algorithm.solutions]).mean(axis=0)
                     for agent_id, solutions in proposed_solutions:
                         dot_products = [ np.dot(solution.variables, base_agent_variables_mean) for solution in solutions ]
-                        avg_diversity = np.sum(np.abs(dot_products)) / len(solutions) if solutions else 0
+                        avg_diversity = np.sum(np.abs(dot_products)) / len(solutions) if solutions else 0  # absolute value of the dot product because we don't care about the direction
                         avg_solution_diversity.append((agent_id, avg_diversity))
                     diversity_min, diversity_max = min(avg_solution_diversity, key=lambda x: x[1])[1], max(avg_solution_diversity, key=lambda x: x[1])[1]
+                    # normalized_quality = basic diversity, it is not inverted, as higher values of diversity are better
                     normalized_quality = [
                         (agent_id, (diversity - diversity_min) / (diversity_max - diversity_min)) for agent_id, diversity in avg_solution_diversity
                     ]

@@ -56,6 +56,7 @@ class MigrationPolicy(Enum):
 class StrategyAgent(BaseAgent):
     # Trust level equal to i means that i-th best solution will be shared - the lower, the better.
     MAX_TRUST_LEVEL = 0
+    MAX_TRUST_STEP = 2  # How much trust is increased/decreased at maximum after each evaluation
 
     def __init__(
         self,
@@ -170,17 +171,21 @@ class StrategyAgent(BaseAgent):
                 #         self.starting_trust
                 #     )
 
-                trust_change = 0
+                positive_count = 0
+                negative_count = 0
                 if len(shared_solutions) > 0:
                     for shared_solution in shared_solutions:
                         if shared_solution in self.algorithm.solutions:
                             # A useful solution was shared.
-                            trust_change -= 1
+                            positive_count += 1
                         else:
                             # A useless solution was shared.
-                            trust_change += 1
-                else:
-                    trust_change = self.no_send_penalty
+                            negative_count += 1
+                # else:
+                #     trust_change = self.no_send_penalty
+
+                trust_change = -self.__class__.MAX_TRUST_STEP + (positive_count / len(shared_solutions)) * 2 * self.__class__.MAX_TRUST_STEP
+                trust_change = round(trust_change)
 
                 self.trust[agent_id_sharing_the_solution] = max(
                     self.__class__.MAX_TRUST_LEVEL,
@@ -205,17 +210,21 @@ class StrategyAgent(BaseAgent):
                 #         self.starting_trust
                 #     )
 
+                positive_count = 0
+                negative_count = 0
                 if len(shared_solutions) > 0:
-                    trust_change = 0
                     for shared_solution in shared_solutions:
                         if shared_solution in self.algorithm.solutions:
                             # A useful solution was shared.
-                            trust_change -= 1
+                            positive_count += 1
                         else:
                             # A useless solution was shared.
-                            trust_change += 1
-                else:
-                    trust_change = self.no_send_penalty
+                            negative_count += 1
+                # else:
+                #     trust_change = self.no_send_penalty
+
+                trust_change = self.__class__.MAX_TRUST_STEP - (positive_count / len(shared_solutions)) * 2 * self.__class__.MAX_TRUST_STEP
+                trust_change = round(trust_change)
 
                 self.trust[agent_id_sharing_the_solution] = max(
                     self.__class__.MAX_TRUST_LEVEL,
