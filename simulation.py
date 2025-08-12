@@ -19,6 +19,8 @@ from analysis.constants_and_params import (
     TRUST_MECHANISM,
     NUMBER_OF_RUNS,
     NUM_OF_VARS,
+    CROSSOVER_RATE,
+    MUTATION_RATE,
     MIGRATION,
     POPULATION_SIZE,
     OFFSPRING_POPULATION_SIZE,
@@ -53,14 +55,14 @@ def run_simulations_and_save_results():
 
         for problem in [problem_type(NUM_OF_VARS) for problem_type in PROBLEMS_TO_TEST]:
             """BASE AGENT CLASS SIMULATION"""
-            output_file_path = (
-                f"{OUTPUT_DIR}/{BaseAgent.name()}_{problem.name()}_{current_date}.csv"
-            )
-            best_result = run_single_simulation(BaseAgent, problem, output_file_path, None, None)
-            print(
-                f"Best result for {output_file_path}:",
-                best_result,
-            )
+            # output_file_path = (
+            #     f"{OUTPUT_DIR}/{BaseAgent.name()}_{problem.name()}_{current_date}.csv"
+            # )
+            # best_result = run_single_simulation(BaseAgent, problem, output_file_path, None, None)
+            # print(
+            #     f"Best result for {output_file_path}:",
+            #     best_result,
+            # )
 
             """SINGLE AGENT CLASS SIMULATION"""
             # for agent_class in AGENTS_TO_TEST:
@@ -82,14 +84,19 @@ def run_simulations_and_save_results():
             #         )
 
             """ MULTI AGENT CLASS SIMULATION """
-            # dir = f"{custom_output}/{problem.name()}"
-            # os.makedirs(dir, exist_ok=True)
-            # output_file_path = (
-            #     f"{dir}/CustomMultiClass_{problem.name()}_{current_date}.csv"
-            # )
-            # run_single_simulation(
-            #     agents, problem, output_file_path, accept_strategies, send_strategies
-            # )
+            dir = f"{custom_output}/{problem.name()}"
+            os.makedirs(dir, exist_ok=True)
+            output_file_path = (
+                f"{dir}/CustomMultiClass_{problem.name()}_{current_date}.csv"
+            )
+            best_result = run_single_simulation(
+                agents, problem, output_file_path, accept_strategies, send_strategies
+            )
+            print(
+                f"Best result for {output_file_path}:",
+                best_result,
+            )
+
 
 
 def run_single_simulation(
@@ -98,8 +105,8 @@ def run_single_simulation(
     output_file_path,
     accept_strategy,
     send_strategy,
-    crossover_rate=0.5,
-    mutation_rate=0.5,
+    crossover_rate=CROSSOVER_RATE,
+    mutation_rate=MUTATION_RATE,
     migration_pop_rate=POPULATION_PART_TO_SWAP,
     migration_interval=GENERATIONS_PER_SWAP,
     save_log=True,

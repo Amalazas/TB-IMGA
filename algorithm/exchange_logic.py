@@ -101,18 +101,18 @@ class ExchangeMarket:
                 ### Select a base agent randomly
                 base_agent_id = random.choice(agent_ids)
                 agent_ids.remove(base_agent_id)
-                ### Collecting proposals from other agents and their trust towards the selected base agent
+                ### Collecting proposals from other agents and base agent's trust towards them
                 proposed_solutions = [ 
                     (agent.id, agent.get_solutions_to_share(base_agent_id)) for agent in self.agents if agent.id in agent_ids 
                     ]
-                trust_towards_base_agent = [
-                    (agent.id, agent.trust[base_agent_id]) for agent in self.agents if agent.id in agent_ids
+                base_agent_trust = [
+                    (agent.id, self.id2agent[base_agent_id].trust[agent.id]) for agent in self.agents if agent.id in agent_ids
                 ]
                 ### Normalization of trust and quality scores plus auction value calculation (min-max normalization)
                 # Trust
-                trust_min, trust_max = min(trust_towards_base_agent, key=lambda x: x[1])[1], max(trust_towards_base_agent, key=lambda x: x[1])[1]
+                trust_min, trust_max = min(base_agent_trust, key=lambda x: x[1])[1], max(base_agent_trust, key=lambda x: x[1])[1]
                 normalized_trust = [
-                    (agent_id, (trust - trust_min) / max((trust_max - trust_min), 1)) for agent_id, trust in trust_towards_base_agent
+                    (agent_id, (trust - trust_min) / max((trust_max - trust_min), 1)) for agent_id, trust in base_agent_trust
                 ]
                 # Quality
                 normalized_quality = []
