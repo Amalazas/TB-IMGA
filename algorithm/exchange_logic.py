@@ -127,9 +127,15 @@ class ExchangeMarket:
                         avg_solution_scores.append((agent_id, avg_score))
                     score_min, score_max = min(avg_solution_scores, key=lambda x: x[1])[1], max(avg_solution_scores, key=lambda x: x[1])[1]
                     # normalized_quality equals (1 - basic normalized_score) to reverse the scale, as lower scores are better
-                    normalized_quality = [
-                        (agent_id, 1 - ((score - score_min) / (score_max - score_min)) ) for agent_id, score in avg_solution_scores
-                    ]
+                    scale = score_max - score_min
+                    if scale == 0: 
+                        normalized_quality = [
+                            (agent_id, 0) for agent_id, _ in avg_solution_scores # Everything is at the same level of score
+                        ]
+                    else:
+                        normalized_quality = [
+                            (agent_id, 1 - ((score - score_min) / scale)) for agent_id, score in avg_solution_scores
+                        ]
                 elif self.id2agent[base_agent_id].accept_strategy is AcceptStrategy.Different:
                     # Diversity Scores - the absolute value of the dot product calculated on the mean base agent vector and mean proposed solution vector - the higher the value, the better
                     avg_solution_diversity = []
@@ -139,10 +145,16 @@ class ExchangeMarket:
                         avg_diversity = np.sum(np.abs(dot_products)) / len(solutions) if solutions else 0  # absolute value of the dot product because we don't care about the direction
                         avg_solution_diversity.append((agent_id, avg_diversity))
                     diversity_min, diversity_max = min(avg_solution_diversity, key=lambda x: x[1])[1], max(avg_solution_diversity, key=lambda x: x[1])[1]
-                    # normalized_quality = basic diversity, it is not inverted, as higher values of diversity are better
-                    normalized_quality = [
-                        (agent_id, (diversity - diversity_min) / (diversity_max - diversity_min)) for agent_id, diversity in avg_solution_diversity
-                    ]
+                    # normalized_quality equals basic diversity, it is not inverted, as higher values of diversity are better
+                    scale = diversity_max - diversity_min
+                    if scale == 0: 
+                        normalized_quality = [
+                            (agent_id, 0) for agent_id, _ in avg_solution_diversity # Everything is at the same level of diversity
+                        ]
+                    else:
+                        normalized_quality = [
+                            (agent_id, (diversity - diversity_min) / scale) for agent_id, diversity in avg_solution_diversity
+                        ]
                 ### Selection of the best agent based on auction value and pairing it with the base agent + save the pair
                 agent_bids = [ (agent_id, AUCTION_TRUST_WEIGHT * trust + AUCTION_SOLUTION_WEIGHT * quality)
                                 for (agent_id, trust), (_, quality) in zip(normalized_trust, normalized_quality) ]
