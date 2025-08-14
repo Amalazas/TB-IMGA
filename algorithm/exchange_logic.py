@@ -73,8 +73,11 @@ class ExchangeMarket:
                 # Roulette wheel selection
                 if trust_sum != 0: # Normal scenario
                     # Calculation of trust ratios as weights (the higher trust value, the lower chance of being selected)
-                    trust_weights = [ 1 - (weight / trust_sum) for weight in trust_weights ] # 1 - portion of all trust
-                    trust_weights = [ weight / sum(trust_weights) for weight in trust_weights ] # Normalize to sum to 1
+                    if len(trust_weights) > 1:  
+                        trust_weights = [ 1 - (weight / trust_sum) for weight in trust_weights ] # 1 - portion of all trust
+                        trust_weights = [ weight / sum(trust_weights) for weight in trust_weights ] # Normalize to sum to 1
+                    else:
+                        trust_weights = [1]  # If only one agent, it has 100% chance of being selected 
                     paired_agent_id = np.random.choice(trust_agent_ids, 1, p=trust_weights)[0]
                 else: # Scenario in which every remaining agent has max trust (equal 0), so we select with uniform distribution
                     paired_agent_id = np.random.choice(trust_agent_ids, 1)[0]

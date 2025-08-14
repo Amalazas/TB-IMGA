@@ -12,18 +12,18 @@ MEAN_PLOTS_DIR = f"{PLOTS_DIR}/mean"
 MULTI_CLASS_PLOTS_DIR = f"{PLOTS_DIR}/PERF_100vars_migration_local_trust"
 
 SIGNIFICANCE_LEVEL = 0.05
-NUMBER_OF_ITERATIONS = 998  # 9998 for 100000 evaluations, 998 for 10000 evaluations
+NUMBER_OF_ITERATIONS = 9998  # USED AS HIGH BOUND FOR PLOTTING SCRIPTS # 9998 for 100000 evaluations, 998 for 10000 evaluations
 ITERATION_INTERVAL = 50  # For plotting results only
-TRUST_MECHANISM = TrustMechanism.Local
-MIGRATION_POLICY = MigrationPolicy.TrustBasedAuction
-NUMBER_OF_RUNS = 1
+TRUST_MECHANISM = TrustMechanism.Global
+MIGRATION_POLICY = MigrationPolicy.TrustBasedRoulette
+NUMBER_OF_RUNS = 5
 NUM_OF_VARS = 100
 POPULATION_SIZE = 20
 OFFSPRING_POPULATION_SIZE = 10
 STARTING_TRUST = 10
-RESTART_TRUST_THRESHOLD = 20 # 20 would be softcap on the worst possible trust, you can go below that # Should be a fairly difficult value to reach
+RESTART_TRUST_THRESHOLD = 20 # NOT IMPLEMENTED 20 would be softcap on the worst possible trust, you can go below that # Should be a fairly difficult value to reach
 GENERATIONS_PER_SWAP = 50
-MAX_EVALUATIONS = 10000
+MAX_EVALUATIONS = 100000 # USED AS STOPPING CRITERION AND COUNTED PER AGENT
 CROSSOVER_RATE = 0.9
 MUTATION_RATE = 0.1
 MIGRATION = True
@@ -31,14 +31,15 @@ RESTARTING_ENABLED = False
 AGENTS_NUMBER = 12 # For some reason, needs to be set to the final number of agents you've specified below
 POPULATION_PART_TO_SWAP = 0.5
 NO_SEND_PENALTY = int(POPULATION_SIZE * POPULATION_PART_TO_SWAP)
+# This weights are supposed to sum up to 1.0 (could be replaced with a single constant but kept for clarity)
 AUCTION_TRUST_WEIGHT = 0.5
 AUCTION_SOLUTION_WEIGHT = 0.5
 
 AGENTS_TO_TEST = [BaseAgent, StrategyAgent]
 # TODO: add Ackley and other binary problem
 PROBLEMS_TO_TEST = [
-    Griewank,
-    Ackley,
+    # Griewank,
+    # Ackley,
     ExpandedSchaffer,
 ]
 ACCEPT_STRATEGIES_TO_TEST = [
@@ -124,6 +125,13 @@ for (send_strategy, accept_strategy) in product(
         agents.append(StrategyAgent)
         send_strategies.append(send_strategy)
         accept_strategies.append(accept_strategy)
+
+""" Testing comps """
+# for _ in range(12):
+#     agents.append(StrategyAgent)
+#     send_strategies.append(SendStrategy.Best)
+#     accept_strategies.append(AcceptStrategy.Different)
+
 
 
 MULTI_CLASS_SETUP = [agents, send_strategies, accept_strategies]
