@@ -15,7 +15,7 @@ from jmetal.util.generator import Generator
 from jmetal.util.termination_criterion import TerminationCriterion
 
 from algorithm.agents.strategy_based import TrustMechanism
-from analysis.constants_and_params import POPULATION_SIZE, RESTART_TRUST_THRESHOLD, RESTARTING_ENABLED
+from analysis.constants_and_params import POPULATION_SIZE, RESTART_TRUST_THRESHOLD, RESTARTING_ENABLED, AUCTION_TRUST_WEIGHT
 
 from .agents import AcceptStrategy, BaseAgent, SendStrategy, StrategyAgent
 from .exchange_logic import ExchangeMarket
@@ -47,6 +47,7 @@ class Runner:
         starting_trust: Optional[int] = None,
         no_send_penalty: Optional[int] = 2,
         part_to_swap: Optional[float] = 0.1,
+        auction_weight: Optional[float] = AUCTION_TRUST_WEIGHT,
         migration: bool = True,
         save_log: bool = True,
     ):
@@ -104,7 +105,7 @@ class Runner:
                 for agent_nr in range(len(agent_class))
             ]
 
-        self.exchange_market = ExchangeMarket(self.agents, migration)
+        self.exchange_market = ExchangeMarket(self.agents, migration, auction_weight)
         self.generations_per_swap = generations_per_swap
         self.output_file_path = output_file_path
         self.save_log = save_log

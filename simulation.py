@@ -29,6 +29,7 @@ from analysis.constants_and_params import (
     AGENTS_NUMBER,
     STARTING_TRUST,
     NO_SEND_PENALTY,
+    AUCTION_TRUST_WEIGHT,
     POPULATION_PART_TO_SWAP,
 )
 
@@ -109,6 +110,8 @@ def run_single_simulation(
     mutation_rate=MUTATION_RATE,
     migration_pop_rate=POPULATION_PART_TO_SWAP,
     migration_interval=GENERATIONS_PER_SWAP,
+    starting_trust=STARTING_TRUST,
+    auction_weight=AUCTION_TRUST_WEIGHT,
     save_log=True,
 ):
     # print(output_file_path)
@@ -137,9 +140,10 @@ def run_single_simulation(
         accept_strategy=accept_strategy,
         migration=MIGRATION,
         trust_mechanism=TRUST_MECHANISM,
-        starting_trust=STARTING_TRUST,
+        starting_trust=starting_trust,
         no_send_penalty=NO_SEND_PENALTY,
         part_to_swap=migration_pop_rate,
+        auction_weight=auction_weight,
         save_log=save_log,
     )
     runner.run_simulation()
@@ -153,9 +157,12 @@ def run_single_simulation(
     return best_result
 
 
-def run_irace_compatible_base_simulation(crossover_rate, mutation_rate, migration_pop_rate, migration_interval):
-    problem = Griewank(NUM_OF_VARS)  
-    return run_single_simulation(BaseAgent, problem, "", None, None, crossover_rate, mutation_rate, migration_pop_rate, migration_interval, save_log=False)
+def run_irace_compatible_base_simulation(crossover_rate, mutation_rate, migration_pop_rate, migration_interval, starting_trust, auction_weight):
+    problem = Ackley(NUM_OF_VARS)  
+    return run_single_simulation(agents, problem, "", accept_strategies, send_strategies, 
+                                 crossover_rate=crossover_rate, mutation_rate=mutation_rate, migration_pop_rate=migration_pop_rate, 
+                                 migration_interval=migration_interval, starting_trust=starting_trust, auction_weight=auction_weight, 
+                                 save_log=False)
 
 
 if __name__ == "__main__":

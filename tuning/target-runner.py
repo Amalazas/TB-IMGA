@@ -49,6 +49,8 @@ if __name__=='__main__':
     mutation_rate = None
     migration_pop_rate = None
     migration_interval = None
+    starting_trust = None
+    auction_weight = None
     # Parse parameters
 
     # Remove first element (instance name)
@@ -66,17 +68,21 @@ if __name__=='__main__':
             migration_pop_rate = float(value)
         elif param == "--mig_inter":
             migration_interval = int(value)
+        elif param == "--start_trust":
+            starting_trust = int(value)
+        elif param == "--auc_weight":
+            auction_weight = float(value)            
         else:
             target_runner_error("unknown parameter %s" % (param))
     
     # Sanity checks
-    if crossover_rate is None or mutation_rate is None or migration_pop_rate is None or migration_interval is None:
+    if crossover_rate is None or mutation_rate is None or migration_pop_rate is None or migration_interval is None or starting_trust is None or auction_weight is None:
         target_runner_error("One or more parameters are missing. Please check the parameters.txt file.")
         sys.exit(1)
         
     
     # Run iRace compatible version of the simulation    
-    result = run_irace_compatible_base_simulation(crossover_rate, mutation_rate, migration_pop_rate, migration_interval)
+    result = run_irace_compatible_base_simulation(crossover_rate, mutation_rate, migration_pop_rate, migration_interval, starting_trust, auction_weight)
     print(result)
     
     sys.exit(0)

@@ -11,7 +11,6 @@ from analysis.constants_and_params import (
     MIGRATION_POLICY, 
     MigrationPolicy, 
     AUCTION_TRUST_WEIGHT, 
-    AUCTION_SOLUTION_WEIGHT,
     )
 
 from algorithm.agents.strategy_based import AcceptStrategy
@@ -22,8 +21,11 @@ class ExchangeMarket:
         self,
         agents: Sequence[Type[StrategyAgent | BaseAgent]],
         migration: bool = False,
+        auction_weight: float = AUCTION_TRUST_WEIGHT,
     ):
         self.migration = migration
+        self.auction_trust_weight = auction_weight
+        self.auction_solution_weight = 1 - auction_weight
         self.log = {}
         self.agents = agents
         self.id2agent = {}
@@ -140,15 +142,15 @@ class ExchangeMarket:
                             (agent_id, 1 - ((score - score_min) / scale)) for agent_id, score in avg_solution_scores
                         ]
                 elif self.id2agent[base_agent_id].accept_strategy is AcceptStrategy.Different:
-                    # Diversity Scores - the absolute value of the dot product calculated on the mean base agent vector and mean proposed solution vector - the higher the value, the better
+                    # Diversity Scores - value of the dot product calculated on the mean base agent vector and mean proposed solution vector - the lower the value, the better
                     avg_solution_diversity = []
                     base_agent_variables_mean = np.array([solution.variables for solution in self.id2agent[base_agent_id].algorithm.solutions]).mean(axis=0)
                     for agent_id, solutions in proposed_solutions:
                         dot_products = [ np.dot(solution.variables, base_agent_variables_mean) for solution in solutions ]
-                        avg_diversity = np.sum(np.abs(dot_products)) / len(solutions) if solutions else 0  # absolute value of the dot product because we don't care about the direction
+                        avg_diversity = np.sum(dot_products) / len(solutions) if solutions else 0
                         avg_solution_diversity.append((agent_id, avg_diversity))
                     diversity_min, diversity_max = min(avg_solution_diversity, key=lambda x: x[1])[1], max(avg_solution_diversity, key=lambda x: x[1])[1]
-                    # normalized_quality equals basic diversity, it is not inverted, as higher values of diversity are better
+                    # normalized_quality equals (1 - basic diversity) to reverse the scale, as lower values of diversity (dot product) are better (more outlying)
                     scale = diversity_max - diversity_min
                     if scale == 0: 
                         normalized_quality = [
@@ -156,10 +158,10 @@ class ExchangeMarket:
                         ]
                     else:
                         normalized_quality = [
-                            (agent_id, (diversity - diversity_min) / scale) for agent_id, diversity in avg_solution_diversity
+                            (agent_id, 1 - ((diversity - diversity_min) / scale)) for agent_id, diversity in avg_solution_diversity
                         ]
                 ### Selection of the best agent based on auction value and pairing it with the base agent + save the pair
-                agent_bids = [ (agent_id, AUCTION_TRUST_WEIGHT * trust + AUCTION_SOLUTION_WEIGHT * quality)
+                agent_bids = [ (agent_id, self.auction_trust_weight * trust + self.auction_solution_weight * quality)
                                 for (agent_id, trust), (_, quality) in zip(normalized_trust, normalized_quality) ]
                 best_agent_id = max(agent_bids, key=lambda x: x[1])[0]
                 paired_agents.append((self.id2agent[base_agent_id], self.id2agent[best_agent_id]))
