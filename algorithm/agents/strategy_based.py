@@ -185,7 +185,7 @@ class StrategyAgent(BaseAgent):
                 # else:
                 #     trust_change = self.no_send_penalty
 
-                trust_change = -self.__class__.MAX_TRUST_STEP + (positive_count / len(shared_solutions)) * 2 * self.__class__.MAX_TRUST_STEP
+                trust_change = self.__class__.MAX_TRUST_STEP - (positive_count / len(shared_solutions)) * 2 * self.__class__.MAX_TRUST_STEP
                 trust_change = round(trust_change)
 
                 self.trust[agent_id_sharing_the_solution] = max(
