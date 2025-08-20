@@ -150,7 +150,7 @@ class ExchangeMarket:
                         avg_diversity = np.sum(dot_products) / len(solutions) if solutions else 0
                         avg_solution_diversity.append((agent_id, avg_diversity))
                     diversity_min, diversity_max = min(avg_solution_diversity, key=lambda x: x[1])[1], max(avg_solution_diversity, key=lambda x: x[1])[1]
-                    # normalized_quality equals (1 - basic diversity) to reverse the scale, as lower values of diversity (dot product) are better (more outlying)
+                    # normalized_quality equals (1 - basic normalized diversity) to reverse the scale, as lower values of diversity (dot product) are better (more outlying)
                     scale = diversity_max - diversity_min
                     if scale == 0: 
                         normalized_quality = [

@@ -41,6 +41,7 @@ class AcceptStrategy(Enum):
 class TrustMechanism(Enum):
     Local = 1
     Global = 2
+    NoTrust = 3 # Just to note that the BasicAgent is being used
 
     def __str__(self):
         return self.name

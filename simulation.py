@@ -22,6 +22,7 @@ from analysis.constants_and_params import (
     CROSSOVER_RATE,
     MUTATION_RATE,
     MIGRATION,
+    MIGRATION_POLICY,
     POPULATION_SIZE,
     OFFSPRING_POPULATION_SIZE,
     GENERATIONS_PER_SWAP,
@@ -45,19 +46,36 @@ def run_simulations_and_save_results():
     start_date = (
         f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
     )
-    migration_mechanism = "migration" if MIGRATION else "cloning"
-    custom_output = f"{OUTPUT_DIR}/{migration_mechanism}_{TRUST_MECHANISM}_starting_trust={STARTING_TRUST}_{start_date}"
-
-    for _ in range(NUMBER_OF_RUNS):
+    # migration_mechanism = "migration" if MIGRATION else "cloning"
+    custom_output = f"{OUTPUT_DIR}/{TRUST_MECHANISM}_{MIGRATION_POLICY}_{start_date}"
+   
+    for i in range(NUMBER_OF_RUNS):
         now = datetime.datetime.now()
-        current_date = (
-            f"{now.year}_{now.month}_{now.day}_{now.hour}_{now.minute}_{now.second}"
-        )
+        exp_id = str(i+1)
 
         for problem in [problem_type(NUM_OF_VARS) for problem_type in PROBLEMS_TO_TEST]:
+            
+            # UNCOMMENT THE TYPE OF SIMULATION YOU WANT TO RUN
+            
+            """ MULTI AGENT CLASS SIMULATION """
+            dir = f"{custom_output}/{problem.name()}"
+            os.makedirs(dir, exist_ok=True)
+            output_file_path = (
+                f"{dir}/exp_{exp_id}.csv"
+            )
+            best_result = run_single_simulation(
+                agents, problem, output_file_path, accept_strategies, send_strategies
+            )
+            print(
+                f"Best result for {output_file_path}:",
+                best_result,
+            )
+            
             """BASE AGENT CLASS SIMULATION"""
+            # dir = f"{custom_output}/{problem.name()}"
+            # os.makedirs(dir, exist_ok=True)
             # output_file_path = (
-            #     f"{OUTPUT_DIR}/{BaseAgent.name()}_{problem.name()}_{current_date}.csv"
+            #     f"{dir}/exp_{exp_id}.csv"
             # )
             # best_result = run_single_simulation(BaseAgent, problem, output_file_path, None, None)
             # print(
@@ -84,21 +102,6 @@ def run_simulations_and_save_results():
             #             agent_class, problem, output_file_path, None, None
             #         )
 
-            """ MULTI AGENT CLASS SIMULATION """
-            dir = f"{custom_output}/{problem.name()}"
-            os.makedirs(dir, exist_ok=True)
-            output_file_path = (
-                f"{dir}/CustomMultiClass_{problem.name()}_{current_date}.csv"
-            )
-            best_result = run_single_simulation(
-                agents, problem, output_file_path, accept_strategies, send_strategies
-            )
-            print(
-                f"Best result for {output_file_path}:",
-                best_result,
-            )
-
-
 
 def run_single_simulation(
     agent_class,
@@ -114,7 +117,7 @@ def run_single_simulation(
     auction_weight=AUCTION_TRUST_WEIGHT,
     save_log=True,
 ):
-    # print(output_file_path)
+    # print(f"{output_file_path=}")
     mutation = (
         BitFlipMutation(mutation_rate)
         if isinstance(problem, BinaryProblem)
@@ -149,16 +152,13 @@ def run_single_simulation(
     runner.run_simulation()
 
     best_result = min(agent.algorithm.result().objectives[0] for agent in runner.agents)
-    # print(
-    #     f"Best result for {output_file_path}:",
-    #     best_result,
-    # )
     
     return best_result
 
 
 def run_irace_compatible_base_simulation(crossover_rate, mutation_rate, migration_pop_rate, migration_interval, starting_trust, auction_weight):
-    problem = Ackley(NUM_OF_VARS)  
+    ''' Simulation for irace compatibility '''
+    problem = Griewank(NUM_OF_VARS)  
     return run_single_simulation(agents, problem, "", accept_strategies, send_strategies, 
                                  crossover_rate=crossover_rate, mutation_rate=mutation_rate, migration_pop_rate=migration_pop_rate, 
                                  migration_interval=migration_interval, starting_trust=starting_trust, auction_weight=auction_weight, 

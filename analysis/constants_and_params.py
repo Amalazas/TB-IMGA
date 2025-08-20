@@ -4,43 +4,64 @@ from algorithm.agents.strategy_based import AcceptStrategy, SendStrategy, TrustM
 from problems import LABS, ExpandedSchaffer, Griewank, Ackley
 from itertools import product
 
-OUTPUT_DIR = "./test_output"
 
+SIGNIFICANCE_LEVEL = 0.05 # STATISTICAL TEST PARAMETER
+
+
+### PLOT PARAMETERS ############################################################
 PLOTS_DIR = "./graphs"
 BOX_AND_WHISKERS_PLOTS_DIR = f"{PLOTS_DIR}/box_and_whiskers"
 MEAN_PLOTS_DIR = f"{PLOTS_DIR}/mean"
 MULTI_CLASS_PLOTS_DIR = f"{PLOTS_DIR}/PERF_100vars_migration_local_trust"
-
-SIGNIFICANCE_LEVEL = 0.05
 NUMBER_OF_ITERATIONS = 9998  # USED AS HIGH BOUND FOR PLOTTING SCRIPTS # 9998 for 100000 evaluations, 998 for 10000 evaluations
-ITERATION_INTERVAL = 50  # For plotting results only
+ITERATION_INTERVAL = 50  # resolution of x axis in plots
+################################################################################
+
+
+### SIMULATION PARAMETERS ######################################################
+# Experiment Type
 TRUST_MECHANISM = TrustMechanism.Global
 MIGRATION_POLICY = MigrationPolicy.TrustBasedAuction
-NUMBER_OF_RUNS = 5
-NUM_OF_VARS = 100
+STARTING_TRUST = 10
+POPULATION_PART_TO_SWAP = 0.5
+AUCTION_TRUST_WEIGHT = 0.5
+# Base Experiment Parameters
+OUTPUT_DIR = "./final_exp_output"
+MAX_EVALUATIONS = 200000 # STOPPING CRITERION, COUNTED PER AGENT
+NUMBER_OF_RUNS = 10
 POPULATION_SIZE = 20
 OFFSPRING_POPULATION_SIZE = 10
-STARTING_TRUST = 10
-RESTART_TRUST_THRESHOLD = 20 # NOT IMPLEMENTED 20 would be softcap on the worst possible trust, you can go below that # Should be a fairly difficult value to reach
-GENERATIONS_PER_SWAP = 50
-MAX_EVALUATIONS = 50000 # USED AS STOPPING CRITERION AND COUNTED PER AGENT
 CROSSOVER_RATE = 0.9
 MUTATION_RATE = 0.1
+AGENTS_NUMBER = 12
 MIGRATION = True
-RESTARTING_ENABLED = False
-AGENTS_NUMBER = 12 # For some reason, needs to be set to the final number of agents you've specified below
-POPULATION_PART_TO_SWAP = 0.5
-NO_SEND_PENALTY = int(POPULATION_SIZE * POPULATION_PART_TO_SWAP)
-AUCTION_TRUST_WEIGHT = 0.5
-# AUCTION_SOLUTION_WEIGHT = 0.5 # Derived from auction trust weight # 1 - AUCTION_TRUST_WEIGHT
-
-AGENTS_TO_TEST = [BaseAgent, StrategyAgent]
-# TODO: add Ackley and other binary problem
+GENERATIONS_PER_SWAP = 50
+NUM_OF_VARS = 100
 PROBLEMS_TO_TEST = [
-    # Griewank,
-    # Ackley,
+    Griewank,
+    Ackley,
     ExpandedSchaffer,
 ]
+###########################
+# CUSTOM MULTI CLASS CONFIG
+agents = []
+send_strategies = []
+accept_strategies = []
+
+""" 3 per type - reasonable ones"""
+for (send_strategy, accept_strategy) in product(
+    [SendStrategy.Outlying, SendStrategy.Best],
+    [AcceptStrategy.Better, AcceptStrategy.Different],
+):
+    for _ in range(3):
+        agents.append(StrategyAgent)
+        send_strategies.append(send_strategy)
+        accept_strategies.append(accept_strategy)
+
+MULTI_CLASS_SETUP = [agents, send_strategies, accept_strategies]
+###################################
+### Single agent simulations CONFIG
+AGENTS_TO_TEST = [BaseAgent, StrategyAgent] 
 ACCEPT_STRATEGIES_TO_TEST = [
     strategy
     for strategy in AcceptStrategy  # if strategy is not AcceptStrategy.Different
@@ -48,8 +69,19 @@ ACCEPT_STRATEGIES_TO_TEST = [
 SEND_STRATEGIES_TO_TEST = [
     strategy for strategy in SendStrategy  # if strategy is not SendStrategy.Outlying
 ]
+################################################################################
 
-# TODO: get rid of this and use `AGENTS_TO_TEST` and `PROBLEMS_TO_TEST` directly.
+
+####################################################
+### NOT AVAILABLE - CURRENTLY DISCARDED FEATURES ###
+RESTARTING_ENABLED = False
+RESTART_TRUST_THRESHOLD = 20 # 20 would be softcap on the worst possible trust, you can go below that # Should be a fairly difficult value to reach
+NO_SEND_PENALTY = int(POPULATION_SIZE * POPULATION_PART_TO_SWAP)
+####################################################
+
+
+###################################################################
+### OLD EXPERIMENTS AND PLOTTING SETUP - LEFT FOR COMPATIBILITY ###
 # Experiment names order matters!!!
 # It's used later for plotting order.
 # Group the names by problem type and have
@@ -66,71 +98,3 @@ EXPERIMENTS = []
 #                     )
 #         else:
 #             EXPERIMENTS.append(f"{agent.name()}_{problem.name()}")
-
-# CUSTOM MULTI CLASS CONFIG (leave one config uncommented if you want to run it)
-agents = []
-send_strategies = []
-accept_strategies = []
-
-""" 5Creative_3Trust_1Perf_1Solo """
-# for _ in range(3):  # Trust Agents
-#     agents.append(AgentWithTrust)
-#     send_strategies.append(None)
-#     accept_strategies.append(None)
-# for _ in range(1):  # Solo Agent
-#     agents.append(StrategyAgent)
-#     send_strategies.append(SendStrategy.Dont)
-#     accept_strategies.append(AcceptStrategy.Reject)
-# for _ in range(5):  # Creative Agents
-#     agents.append(StrategyAgent)
-#     send_strategies.append(SendStrategy.Outlying)
-#     accept_strategies.append(AcceptStrategy.Different)
-# for _ in range(1):  # Perfectionist Agents
-#     agents.append(StrategyAgent)
-#     send_strategies.append(SendStrategy.Best)
-#     accept_strategies.append(AcceptStrategy.Better)
-
-""" 1Extractor_2Tryhard_2Filter_6Creative """
-# for _ in range(1):
-#     agents.append(StrategyAgent)  # Extractor
-#     send_strategies.append(SendStrategy.Dont)
-#     accept_strategies.append(AcceptStrategy.Better)
-# for _ in range(2):
-#     agents.append(StrategyAgent)  # Tryhard
-#     send_strategies.append(SendStrategy.Best)
-#     accept_strategies.append(AcceptStrategy.Always)
-# for _ in range(2):
-#     agents.append(StrategyAgent)  # Filter
-#     send_strategies.append(SendStrategy.Best)
-#     accept_strategies.append(AcceptStrategy.Different)
-# for _ in range(6):
-#     agents.append(StrategyAgent)  # Creative
-#     send_strategies.append(SendStrategy.Outlying)
-#     accept_strategies.append(AcceptStrategy.Different)
-
-"""All different mixes."""
-# for send_strategy in SendStrategy:
-#     for accept_strategy in AcceptStrategy:
-#         agents.append(StrategyAgent)
-#         send_strategies.append(send_strategy)
-#         accept_strategies.append(accept_strategy)
-
-""" 3 per type - reasonable ones"""
-for (send_strategy, accept_strategy) in product(
-    [SendStrategy.Outlying, SendStrategy.Best],
-    [AcceptStrategy.Better, AcceptStrategy.Different],
-):
-    for _ in range(3):
-        agents.append(StrategyAgent)
-        send_strategies.append(send_strategy)
-        accept_strategies.append(accept_strategy)
-
-""" Testing comps """
-# for _ in range(12):
-#     agents.append(StrategyAgent)
-#     send_strategies.append(SendStrategy.Best)
-#     accept_strategies.append(AcceptStrategy.Different)
-
-
-
-MULTI_CLASS_SETUP = [agents, send_strategies, accept_strategies]
