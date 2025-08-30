@@ -15,7 +15,6 @@ from jmetal.util.generator import Generator
 from jmetal.util.termination_criterion import TerminationCriterion
 
 from algorithm.agents.strategy_based import TrustMechanism
-from analysis.constants_and_params import POPULATION_SIZE, RESTART_TRUST_THRESHOLD, RESTARTING_ENABLED, AUCTION_TRUST_WEIGHT
 
 from .agents import AcceptStrategy, BaseAgent, SendStrategy, StrategyAgent
 from .exchange_logic import ExchangeMarket
@@ -47,10 +46,14 @@ class Runner:
         starting_trust: Optional[int] = None,
         no_send_penalty: Optional[int] = 2,
         part_to_swap: Optional[float] = 0.1,
-        auction_weight: Optional[float] = AUCTION_TRUST_WEIGHT,
+        auction_weight: Optional[float] = None,
         migration: bool = True,
         save_log: bool = True,
     ):
+        if auction_weight is None:
+            from analysis.constants_and_params import AUCTION_TRUST_WEIGHT
+            auction_weight = AUCTION_TRUST_WEIGHT
+            
         global_trust = {agent_id: starting_trust for agent_id in range(agents_number)} # Initial trust values for agents
         # In case of a Uniform Agent Class simulation
         if callable(agent_class):
@@ -116,6 +119,8 @@ class Runner:
         ### Go through all agent and check whether there is an agent whose average towards it is above the threshold
         ### (higher value in the agent.trust dictionary means lower trust level towards the agent)
         
+        from analysis.constants_and_params import RESTART_TRUST_THRESHOLD
+        
         average_trusts_per_agent = { agent.id: 0.0 for agent in self.agents }
         for agent in self.agents:
             for agent_id, trust in agent.trust.items():
@@ -172,6 +177,7 @@ class Runner:
                     data_to_save["generation"].append(number_of_generations)
                     data_to_save["agent_id"].append(agent_id)
                     data_to_save["score"].append(agent.algorithm.result().objectives[0])
+                    from analysis.constants_and_params import POPULATION_SIZE
                     assert len(agent.algorithm.solutions) == POPULATION_SIZE
                     if isinstance(agent, StrategyAgent):
                         data_to_save["class"].append(

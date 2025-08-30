@@ -9,11 +9,11 @@ SIGNIFICANCE_LEVEL = 0.05 # STATISTICAL TEST PARAMETER
 
 
 ### PLOT PARAMETERS ############################################################
-PLOTS_DIR = "./graphs"
+PLOTS_DIR = "./final_graphs"
 BOX_AND_WHISKERS_PLOTS_DIR = f"{PLOTS_DIR}/box_and_whiskers"
 MEAN_PLOTS_DIR = f"{PLOTS_DIR}/mean"
-MULTI_CLASS_PLOTS_DIR = f"{PLOTS_DIR}/PERF_100vars_migration_local_trust"
-NUMBER_OF_ITERATIONS = 9998  # USED AS HIGH BOUND FOR PLOTTING SCRIPTS # 9998 for 100000 evaluations, 998 for 10000 evaluations
+MULTI_CLASS_PLOTS_DIR = f"{PLOTS_DIR}/multi_class"
+NUMBER_OF_ITERATIONS = 19998  # USED AS HIGH BOUND FOR PLOTTING SCRIPTS # 9998 for 100000 evaluations, 998 for 10000 evaluations
 ITERATION_INTERVAL = 50  # resolution of x axis in plots
 ################################################################################
 
@@ -22,12 +22,12 @@ ITERATION_INTERVAL = 50  # resolution of x axis in plots
 # Experiment Type
 TRUST_MECHANISM = TrustMechanism.Global
 MIGRATION_POLICY = MigrationPolicy.TrustBasedAuction
-STARTING_TRUST = 12
+STARTING_TRUST = 12 # Lower trust value means higher trust level (I know it's confusing, sry about that)
 AUCTION_TRUST_WEIGHT = 0.4
 # Base Experiment Parameters
 OUTPUT_DIR = "./final_exp_output"
 MAX_EVALUATIONS = 200000 # STOPPING CRITERION, COUNTED PER AGENT
-NUMBER_OF_RUNS = 10
+NUMBER_OF_RUNS = 1
 POPULATION_SIZE = 20
 OFFSPRING_POPULATION_SIZE = 10
 CROSSOVER_RATE = 0.9

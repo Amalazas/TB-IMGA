@@ -2,16 +2,13 @@ import random
 import numpy as np
 import pandas as pd
 from typing import Type, Sequence
+from math import ceil
 
 from .agents.base import BaseAgent 
 from .agents.strategy_based import StrategyAgent
 from collections import defaultdict
 
-from analysis.constants_and_params import (
-    MIGRATION_POLICY, 
-    MigrationPolicy, 
-    AUCTION_TRUST_WEIGHT, 
-    )
+from algorithm.agents.strategy_based import MigrationPolicy
 
 from algorithm.agents.strategy_based import AcceptStrategy
 
@@ -21,7 +18,7 @@ class ExchangeMarket:
         self,
         agents: Sequence[Type[StrategyAgent | BaseAgent]],
         migration: bool = False,
-        auction_weight: float = AUCTION_TRUST_WEIGHT,
+        auction_weight: float = None,
     ):
         self.migration = migration
         self.auction_trust_weight = auction_weight
@@ -34,6 +31,11 @@ class ExchangeMarket:
 
 
     def exchange_information(self):
+        from analysis.constants_and_params import MIGRATION_POLICY, AUCTION_TRUST_WEIGHT, POPULATION_PART_TO_SWAP
+        
+        if self.auction_trust_weight is None:
+            self.auction_trust_weight = AUCTION_TRUST_WEIGHT
+            self.auction_solution_weight = 1 - AUCTION_TRUST_WEIGHT
         
         ### Agent pairing
         paired_agents = []
@@ -177,14 +179,16 @@ class ExchangeMarket:
 
         ### Migration
         for agent1, agent2 in paired_agents:
-            starting_population_size = len(agent1.algorithm.solutions)
             agent1_solutions = agent1.get_solutions_to_share(agent2.id)
             agent2_solutions = agent2.get_solutions_to_share(agent1.id)
             if self.migration:
                 agent1.remove_solutions(agent1_solutions)
                 agent2.remove_solutions(agent2_solutions)
-            agent1.use_shared_solutions(agent2_solutions, agent2.id, starting_population_size)
-            agent2.use_shared_solutions(agent1_solutions, agent1.id, starting_population_size)
+                agent1.use_shared_solutions(agent2_solutions, agent2.id, population_cutoff=ceil((1-POPULATION_PART_TO_SWAP)*agent1.algorithm.population_size))
+                agent2.use_shared_solutions(agent1_solutions, agent1.id, population_cutoff=ceil((1-POPULATION_PART_TO_SWAP)*agent2.algorithm.population_size))
+            else:
+                agent1.use_shared_solutions(agent2_solutions, agent2.id, population_cutoff=agent1.algorithm.population_size)
+                agent2.use_shared_solutions(agent1_solutions, agent1.id, population_cutoff=agent2.algorithm.population_size)    
                 
     def save_log(self, log_file_path: str):
         pd.DataFrame(self.log).to_csv(log_file_path, index=False)

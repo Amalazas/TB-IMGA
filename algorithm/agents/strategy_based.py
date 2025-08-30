@@ -145,26 +145,33 @@ class StrategyAgent(BaseAgent):
         self,
         shared_solutions: list[Solution],
         agent_id_sharing_the_solution,
-        starting_population_size,
+        population_cutoff
     ):
+        
+        # Get starting solutions to fill in gaps later
+        starting_solutions = deepcopy(self.algorithm.solutions)
+        starting_solutions.sort(
+            key=cmp_to_key(self.algorithm.solution_comparator.compare)
+        )
+        
         if self.accept_strategy is AcceptStrategy.Always:
             shared_solutions.extend(self.algorithm.solutions)
             self.algorithm.solutions = shared_solutions[
-                : self.algorithm.population_size
+                : population_cutoff
             ]
 
             # Sort to keep in order.
             self.algorithm.solutions.sort(
                 key=cmp_to_key(self.algorithm.solution_comparator.compare)
             )
-        elif self.accept_strategy is AcceptStrategy.Better:
+        elif self.accept_strategy is AcceptStrategy.Better:   
             self.algorithm.solutions.extend(shared_solutions)
             self.algorithm.solutions.sort(
                 key=cmp_to_key(self.algorithm.solution_comparator.compare)
             )
 
             self.algorithm.solutions = self.algorithm.solutions[
-                : self.algorithm.population_size
+                : population_cutoff
             ]
             if self.trust is not None:
                 # if agent_id_sharing_the_solution not in self.trust:
@@ -198,7 +205,7 @@ class StrategyAgent(BaseAgent):
         elif self.accept_strategy is AcceptStrategy.Different:
             self.algorithm.solutions.extend(shared_solutions)
             self.algorithm.solutions = self.rank_outliers()[
-                : self.algorithm.population_size
+                : population_cutoff
             ]
 
             self.algorithm.solutions.sort(
@@ -235,9 +242,15 @@ class StrategyAgent(BaseAgent):
         """
         In some cases (e.g. when Agent sends but does not accept solutions) the population size decreases.
         To keep the population size constant, we need to fill in the gaps.
-        Currently we use method that creates a new solution by crossing existing solutions. 
+        Either save the starting solutions or create new ones using reproduction.
         """
-        if len(self.algorithm.solutions) < starting_population_size:
+        # Fill in with starting solutions first
+        while len(starting_solutions) > 0:
+            candidate = starting_solutions.pop(0)
+            if candidate not in self.algorithm.solutions:
+                self.algorithm.solutions.append(candidate)
+        # Fill in with new solutions if needed
+        if len(self.algorithm.solutions) < self.algorithm.population_size:
             parents_for_crossover = (
                 self.algorithm.crossover_operator.get_number_of_parents()
             )
@@ -248,13 +261,13 @@ class StrategyAgent(BaseAgent):
             new_solutions = self.algorithm.reproduction(mating_population)
             self.algorithm.solutions.extend(
                 new_solutions[
-                    : starting_population_size - len(self.algorithm.solutions)
+                    : self.algorithm.population_size - len(self.algorithm.solutions)
                 ]
             )
 
         # Double Check
         assert (
-            len(self.algorithm.solutions) == starting_population_size
+            len(self.algorithm.solutions) == self.algorithm.population_size
         ), "Population refill is not enough!!!"
 
     # Returns solutions sorted by the dot product of its variables and the mean variables of all the solutions
