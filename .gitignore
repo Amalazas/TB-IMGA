@@ -2,6 +2,9 @@
 .vscode
 /output
 /new_output
+/final_exp_output
+/final_exp_output_old
+/final_graphs_old
 /tuning/logs
 /tuning/trash
 /tuning/FirstLogs

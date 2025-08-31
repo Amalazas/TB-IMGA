@@ -131,7 +131,7 @@ def plot_and_save_graphs_with_mean_best_results_for_each_iteration():
         ax.legend()
         
         ax.set_title(f"Średnia wartość najlepszego dopasowania i odchylenie standardowe - Modele z Reputacją - {function_name}")
-        ax.set_xlabel("Liczba ewaluacji")
+        ax.set_xlabel("Liczba pokoleń")
         ax.set_ylabel("Średnia wartość najlepszego dopasowania")
         ax.set_yscale('log')
 

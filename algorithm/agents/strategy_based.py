@@ -57,6 +57,7 @@ class MigrationPolicy(Enum):
 class StrategyAgent(BaseAgent):
     # Trust level equal to i means that i-th best solution will be shared - the lower, the better.
     MAX_TRUST_LEVEL = 0
+    MIN_TRUST_LEVEL = 20  # The worst trust level possible
     MAX_TRUST_STEP = 2  # How much trust is increased/decreased at maximum after each evaluation
 
     def __init__(
@@ -197,7 +198,7 @@ class StrategyAgent(BaseAgent):
 
                 self.trust[agent_id_sharing_the_solution] = max(
                     self.__class__.MAX_TRUST_LEVEL,
-                    self.trust[agent_id_sharing_the_solution] + trust_change,
+                    min(self.__class__.MIN_TRUST_LEVEL, self.trust[agent_id_sharing_the_solution] + trust_change),
                 )
 
         elif self.accept_strategy is AcceptStrategy.Reject:
@@ -236,7 +237,7 @@ class StrategyAgent(BaseAgent):
 
                 self.trust[agent_id_sharing_the_solution] = max(
                     self.__class__.MAX_TRUST_LEVEL,
-                    self.trust[agent_id_sharing_the_solution] + trust_change,
+                    min(self.__class__.MIN_TRUST_LEVEL, self.trust[agent_id_sharing_the_solution] + trust_change),
                 )
 
         """

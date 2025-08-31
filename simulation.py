@@ -158,7 +158,7 @@ def run_single_simulation(
 
 def run_irace_compatible_base_simulation(crossover_rate, mutation_rate, migration_pop_rate, migration_interval, starting_trust, auction_weight):
     ''' Simulation for irace compatibility '''
-    problem = Griewank(NUM_OF_VARS)  
+    problem = ExpandedSchaffer(NUM_OF_VARS)  
     return run_single_simulation(agents, problem, "", accept_strategies, send_strategies, 
                                  crossover_rate=crossover_rate, mutation_rate=mutation_rate, migration_pop_rate=migration_pop_rate, 
                                  migration_interval=migration_interval, starting_trust=starting_trust, auction_weight=auction_weight, 
